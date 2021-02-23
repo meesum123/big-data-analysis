@@ -64,7 +64,6 @@ vector<int> BruteForceMinMax(vector<vector<int>> grid, int n, int n_tuples)
             {
                 total_comparisons++;
                 if(grid[i][j] == max[j][m1]){
-                    cout << "wut" << endl;
                     break;
                 }
                 if (grid[i][j] > max[j][m1])
@@ -88,7 +87,7 @@ vector<int> BruteForceMinMax(vector<vector<int>> grid, int n, int n_tuples)
             for (int m1 = 0; m1 < n_tuples / 2; m1++)
             {
                 total_comparisons++;
-                if(grid[i][j] == max[j][m1]){
+                if(grid[i][j] == min[j][m1]){
                     break;
                 }
                 if (grid[i][j] < min[j][m1])
@@ -125,13 +124,10 @@ vector<int> BruteForceMinMax(vector<vector<int>> grid, int n, int n_tuples)
     for(int i=0; i<n_tuples/2; i++){
         int ret_value = kthSmallest(temp_result, 0, n_tuples*n - 1, i+1);
         result.push_back(ret_value);
-        cout << ret_value << endl;
     }
-    cout << endl;
     for(int i=0; i<n_tuples/2; i++){
         int ret_value = kthSmallest(temp_result, 0, n_tuples*n - 1, (n_tuples*n) - (i+1));
         result.push_back(ret_value);
-        cout << ret_value << endl;
     }
     return result;
 }
@@ -169,34 +165,49 @@ int main()
         }
         grid.push_back(temp);
     }
+    vector<vector<int>> div1 = getDiv(grid, 0, n/2, 0, n/2);
+    vector<vector<int>> div2 = getDiv(grid, n/2, n, 0, n/2);
+    vector<vector<int>> div3 = getDiv(grid, 0, n/2, n/2, n);
+    vector<vector<int>> div4 = getDiv(grid, n/2, n, n/2, n);
     vector<int> result;
     auto start_br = chrono::high_resolution_clock::now();
     result = BruteForceMinMax(grid, n, 12);
     auto stop_br = chrono::high_resolution_clock::now();
+    for(auto i : result){
+        cout << i << " ";
+    }
+    cout << endl;
     auto duration_br = chrono::duration_cast<chrono::microseconds>(stop_br - start_br);
     cout << "min : " << result[0] << endl;
-    cout << "max : " << result[3] << endl;
-    cout << "total_compares : " << result[2] << endl;
-    cout << "brute force duration : " << duration_br.count() << endl;
-/*
-    vector<vector<int>> div1 = getDiv(grid, 0, 5000, 0, 5000);
-    vector<vector<int>> div2 = getDiv(grid, 5000, 10000, 0, 5000);
-    vector<vector<int>> div3 = getDiv(grid, 0, 5000, 5000, 10000);
-    vector<vector<int>> div4 = getDiv(grid, 5000, 10000, 5000, 10000);
+    cout << "max : " << result[6] << endl;
+    //cout << "total_compares : " << result[2] << endl;
+    cout << "brute force duration : " << duration_br.count() << endl << endl;
+
     auto start_tr = chrono::high_resolution_clock::now();
-    future<vector<int>> t1 = async(launch::async, BruteForceMinMax, div1, 5000, 6);
-    future<vector<int>> t2 = async(launch::async, BruteForceMinMax, div2, 5000, 6);
-    future<vector<int>> t3 = async(launch::async, BruteForceMinMax, div3, 5000, 6);
-    future<vector<int>> t4 = async(launch::async, BruteForceMinMax, div4, 5000, 6);
+    future<vector<int>> t1 = async(launch::async, BruteForceMinMax, div1, n/2, 12);
+    future<vector<int>> t2 = async(launch::async, BruteForceMinMax, div2, n/2, 12);
+    future<vector<int>> t3 = async(launch::async, BruteForceMinMax, div3, n/2, 12);
+    future<vector<int>> t4 = async(launch::async, BruteForceMinMax, div4, n/2, 12);
     vector<int> d1 = t1.get();
     vector<int> d2 = t2.get();
     vector<int> d3 = t3.get();
     vector<int> d4 = t4.get();
-    cout << d1[0] << " " << d1[1] << " " << d1[2] << endl;
-    cout << d2[0] << " " << d2[1] << " " << d2[2] << endl;
-    cout << d3[0] << " " << d3[1] << " " << d3[2] << endl;
-    cout << d4[0] << " " << d4[1] << " " << d4[2] << endl;
-
+    for(auto i : d1){
+        cout << i << " ";
+    }
+    cout << endl;
+    for(auto i : d2){
+        cout << i << " ";
+    }
+    cout << endl;
+    for(auto i : d3){
+        cout << i << " ";
+    }
+    cout << endl;
+    for(auto i : d4){
+        cout << i << " ";
+    }
+    cout << endl;
     vector<vector<int>> thread_returns;
     thread_returns.push_back(d1);
     thread_returns.push_back(d2);
@@ -204,20 +215,22 @@ int main()
     thread_returns.push_back(d4);
 
     int glob_min = thread_returns[0][0];
-    int glob_max = thread_returns[0][1];
+    int glob_max = thread_returns[0][6];
     int glob_compares = 0;
 
-    for (auto ret : thread_returns)
+    for (auto ret1 : thread_returns)
     {
-        if (ret[0] < glob_min)
-        {
-            glob_min = ret[0];
+        for(auto ret2 : ret1){
+            if (ret2 < glob_min)
+            {
+                glob_min = ret2;
+            }
+            if (ret2 > glob_max)
+            {
+                glob_max = ret2;
+            }
+            glob_compares += 1;
         }
-        if (ret[1] > glob_max)
-        {
-            glob_max = ret[1];
-        }
-        glob_compares += ret[2];
     }
     auto stop_tr = chrono::high_resolution_clock::now();
     auto duration_tr = chrono::duration_cast<chrono::microseconds>(stop_tr - start_tr);
@@ -225,5 +238,4 @@ int main()
     cout << "global max : " << glob_max << endl;
     cout << "global compares : " << glob_compares << endl;
     cout << "thread duration : " << duration_tr.count() << endl;
-*/
 }

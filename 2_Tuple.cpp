@@ -12,7 +12,6 @@ vector <int> BruteForceMinMax(vector <vector <int>> grid, int n){
     int min_max[n][2];
     int total_comparisons = 0;
     for(int i=n-1; i>=0; i--){
-        cout << this_id << endl;
         for(int j=0; j<n; j++){
             if(i==n-1){
                 min_max[j][0] = grid[i][j];
@@ -79,13 +78,13 @@ int main(){
     auto duration_br = chrono::duration_cast<chrono::microseconds>(stop_br - start_br); 
     cout << "min : " << result[0] << endl;
     cout << "max : " << result[1] << endl;
-    cout << "total_compares : " << result[2] << endl;
+    cout << "compares per column : " << 2*n - 3 << endl;
     cout << "brute force duration : " << duration_br.count() << endl;
+    auto start_tr = chrono::high_resolution_clock::now();
     vector <vector <int>> div1 = getDiv(grid, 0, 50, 0, 50);
     vector <vector <int>> div2 = getDiv(grid, 50, 100, 0, 50);
     vector <vector <int>> div3 = getDiv(grid, 0, 50, 50, 100);
     vector <vector <int>> div4 = getDiv(grid, 50, 100, 50, 100);
-    auto start_tr = chrono::high_resolution_clock::now();
     future <vector <int>> t1 = async(launch::async, BruteForceMinMax, div1, 50);  
     future <vector <int>> t2 = async(launch::async, BruteForceMinMax, div2, 50);  
     future <vector <int>> t3 = async(launch::async, BruteForceMinMax, div3, 50);  
@@ -94,10 +93,6 @@ int main(){
     vector <int> d2 = t2.get();
     vector <int> d3 = t3.get();
     vector <int> d4 = t4.get();
-    cout << d1[0] << " " << d1[1] << " " << d1[2] << endl;
-    cout << d2[0] << " " << d2[1] << " " << d2[2] << endl;
-    cout << d3[0] << " " << d3[1] << " " << d3[2] << endl;
-    cout << d4[0] << " " << d4[1] << " " << d4[2] << endl;
 
     vector <vector <int>> thread_returns;
     thread_returns.push_back(d1);
@@ -122,6 +117,6 @@ int main(){
     auto duration_tr = chrono::duration_cast<chrono::microseconds>(stop_tr - start_tr); 
     cout << "global min : " << glob_min << endl;
     cout << "global max : " << glob_max << endl;
-    cout << "global compares : " << glob_compares << endl;
+    cout << "compares per column : " << 2*n - 3 << endl;
     cout << "thread duration : " << duration_tr.count() << endl;
 }
